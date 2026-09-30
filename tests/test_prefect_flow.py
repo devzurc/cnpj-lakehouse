@@ -10,6 +10,12 @@ from types import SimpleNamespace
 import duckdb
 import pytest
 
+
+def _promoted_artifact(artifacts: Path) -> Path:
+    directories = [path for path in artifacts.iterdir() if path.is_dir() and not path.name.startswith(".")]
+    assert len(directories) == 1
+    return directories[0]
+
 from cnpj_lakehouse.flows.cnpj_lakehouse import (
     build_relationship_preserving_sample,
     cnpj_lakehouse_flow,
@@ -198,7 +204,7 @@ def test_dbt_artifacts_are_retained_per_command(tmp_path: Path, monkeypatch: pyt
     monkeypatch.setattr(subprocess, "run", fake_run)
     artifacts = tmp_path / "artifacts"
     run_dbt(project, project, artifacts, ["run"], {}, "dbt-run")
-    destination = next(artifacts.iterdir())
+    destination = _promoted_artifact(artifacts)
     assert (destination / "manifest.json").is_file()
     assert (destination / "run_results.json").is_file()
     assert (destination / "stdout.log").read_text(encoding="utf-8") == "ok"
@@ -219,9 +225,8 @@ def test_dbt_does_not_misattribute_stale_artifacts(
     artifacts = tmp_path / "artifacts"
     with pytest.raises(RuntimeError, match="without both manifest"):
         run_dbt(project, project, artifacts, ["deps"], {}, "dbt-deps")
-    destination = next(artifacts.iterdir())
-    assert not (destination / "manifest.json").exists()
-    assert not (destination / "run_results.json").exists()
+    promoted = [path for path in artifacts.iterdir() if path.is_dir() and not path.name.startswith(".")]
+    assert promoted == []
 
 
 def test_dbt_failure_retains_logs_and_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -238,7 +243,7 @@ def test_dbt_failure_retains_logs_and_raises(tmp_path: Path, monkeypatch: pytest
     artifacts = tmp_path / "artifacts"
     with pytest.raises(RuntimeError, match="exit code 2"):
         run_dbt(project, project, artifacts, ["run"], {}, "dbt-run")
-    destination = next(artifacts.iterdir())
+    destination = _promoted_artifact(artifacts)
     assert (destination / "stdout.log").read_text(encoding="utf-8") == "partial output"
     assert (destination / "stderr.log").read_text(encoding="utf-8") == "compiler error"
 
