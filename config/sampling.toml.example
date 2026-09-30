@@ -1,0 +1,11 @@
+# Copy to config/sampling.toml (gitignored) or set CNPJ_LAKEHOUSE_* in .env.
+# Precedence: CLI/flow argument > environment > this file > defaults below.
+# Do not point a 20k cohort at the official 2026 backfill warehouse.
+
+sample_size = 10000
+parallel_jobs = 1
+ingestion_workers = 2
+
+# Example: four parallel jobs of 5_000 unique companies (20_000 total)
+# sample_size = 5000
+# parallel_jobs = 4

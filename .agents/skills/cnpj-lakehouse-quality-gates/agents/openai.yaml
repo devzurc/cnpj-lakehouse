@@ -1,0 +1,6 @@
+interface:
+  display_name: "Quality Gates"
+  short_description: "Validate work with task evidence"
+  default_prompt: "Use $cnpj-lakehouse-quality-gates to select proportionate checks and record reproducible evidence for the active task."
+policy:
+  allow_implicit_invocation: true

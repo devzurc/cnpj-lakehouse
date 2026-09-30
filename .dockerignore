@@ -1,0 +1,35 @@
+# Keep Docker build context limited to files copied by the Dockerfile.
+.git
+.venv
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.py[cod]
+
+# Generated, restricted, or local-only runtime material.
+.env
+.env.*
+runtime/
+downloads/
+*.db
+*.sqlite
+*.parquet
+*.duckdb
+*.duckdb.wal
+*.duckdb.tmp
+*.part
+*.zip
+*.csv
+
+# Development-only trees not needed by the image build.
+tests/
+docs/
+project/
+.agents/
+.codex/
+config/
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml

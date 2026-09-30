@@ -1,0 +1,6 @@
+interface:
+  display_name: "dbt Development"
+  short_description: "Build tested Silver and Gold dbt models"
+  default_prompt: "Use $cnpj-lakehouse-dbt-development to implement the assigned dbt task."
+policy:
+  allow_implicit_invocation: true

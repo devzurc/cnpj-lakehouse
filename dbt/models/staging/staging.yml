@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: stg_companies
+    description: Registro mais recente de empresas no grão de `cnpj_basico` único, materializado como view. Padroniza tipos e capital social.
+    columns:
+      - name: cnpj_basico
+        description: Identificador raiz da empresa (8 dígitos, com zeros à esquerda preservados).
+        tests: [not_null, unique]
+      - name: razao_social
+        description: Nome empresarial oficial (Razão Social).
+      - name: capital_social
+        description: Valor do Capital Social convertido para decimal(18,2).
+        tests: [non_negative]
+      - name: capital_social_parse_failed
+        description: Indicador de valor bruto não vazio que não pôde ser convertido no padrão decimal brasileiro; deve permanecer falso em lotes aceitos.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [false]
+
+  - name: stg_establishments
+    description: Registro mais recente de estabelecimentos no grão de `cnpj` de 14 dígitos único, materializado como view.
+    columns:
+      - name: cnpj
+        description: Identificador completo do estabelecimento com 14 dígitos formatados.
+        tests: [not_null, unique]
+      - name: cnpj_basico
+        description: Identificador raiz da empresa matriz/filial.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_companies')
+                field: cnpj_basico
+      - name: situacao_cadastral
+        description: Código de situação cadastral (ex. 02 = ativa).
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['01', '02', '03', '04', '08']
+      - name: principal_cnae
+        description: Código CNAE de atividade primária (7 dígitos).
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_cnae')
+                field: cnae_code
+
+  - name: stg_partners
+    description: Registros do quadro societário (QSA) no grão de `source_period + record_hash + linhagem física`, materializado como view. Documentos brutos permanecem apenas na Bronze; a Silver expõe pseudônimos SHA-256 versionados.
+    columns:
+      - name: cnpj_basico
+        description: CNPJ básico da empresa à qual o sócio pertence.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_companies')
+              field: cnpj_basico
+      - name: partner_document_pseudonym
+        description: Pseudônimo determinístico `v1:` SHA-256 do documento do sócio; nunca contém o valor Bronze bruto.
+      - name: legal_representative_document_pseudonym
+        description: Pseudônimo determinístico `v1:` SHA-256 do documento do representante legal; nunca contém o valor Bronze bruto.
+
+  - name: stg_simples
+    description: Situação mais recente de opção pelo Simples Nacional e MEI no grão de `cnpj_basico` único, materializado como view.
+    columns:
+      - name: cnpj_basico
+        description: CNPJ básico da empresa consultada.
+        tests: [not_null, unique]
+
+  - name: stg_cnae
+    description: Tabela de domínio oficial da CNAE no grão de `cnae_code` único de 7 posições, materializado como view.
+    columns:
+      - name: cnae_code
+        description: Código CNAE de 7 dígitos.
+        tests: [not_null, unique]

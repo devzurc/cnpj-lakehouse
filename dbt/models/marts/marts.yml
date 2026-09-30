@@ -1,0 +1,95 @@
+version: 2
+
+models:
+  - name: dim_company_current
+    description: Dimensão de empresas no estado cadastral atual no grão de `cnpj_basico` único; materializada como tabela na camada Gold.
+    columns:
+      - name: cnpj_basico
+        description: Identificador raiz da empresa (8 posições).
+        tests: [not_null, unique]
+      - name: razao_social
+        description: Nome empresarial completo registrado na Receita Federal.
+      - name: capital_social
+        description: Capital Social atualizado da empresa em reais (decimal 18,2).
+        tests: [non_negative]
+      - name: principal_cnae
+        description: Código CNAE de atividade primária da empresa.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_cnae')
+                field: cnae_code
+
+  - name: dim_cnae
+    description: Dimensão de consulta oficial de subclasses CNAE no grão de `cnae_code` único de 7 dígitos; materializada como tabela.
+    columns:
+      - name: cnae_code
+        description: Código oficial da subclasse CNAE (7 dígitos, com zeros à esquerda preservados).
+        tests: [not_null, unique]
+      - name: cnae_description
+        description: Descrição oficial da atividade econômica da subclasse.
+
+  - name: fct_company_activity_daily
+    description: Fato diária de atividade contendo métricas apenas de empresas ativas no grão de `reference_date + cnpj_basico`; materialização incremental via delete+insert particionada por reference_date.
+    tests:
+      - unique_combination:
+          arguments:
+            combination_of_columns: [reference_date, cnpj_basico]
+      - active_company_has_establishments
+    columns:
+      - name: reference_date
+        description: Data de referência do instantâneo mensal/diário (último dia do período da fonte por padrão).
+        tests: [not_null]
+      - name: cnpj_basico
+        description: Identificador raiz da empresa ativa.
+        tests: [not_null]
+      - name: active_establishment_count
+        description: Contagem de estabelecimentos com situação cadastral ativa ('02'). Deve ser maior que zero.
+      - name: partner_count
+        description: Quantidade total de sócios no quadro societário da empresa.
+      - name: capital_social
+        description: Capital Social da empresa na data de referência.
+      - name: principal_cnae
+        description: CNAE principal do estabelecimento ativo representativo da empresa.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_cnae')
+                field: cnae_code
+      - name: uf
+        description: Sigla da Unidade Federativa do estabelecimento representativo.
+      - name: is_simples_nacional
+        description: Flag booleana indicando opção confirmada pelo Simples Nacional.
+      - name: is_mei
+        description: Flag booleana indicando enquadramento como Microempreendedor Individual (MEI).
+
+  - name: dim_cnae_hierarchy
+    description: Dimensão enriquecida com a estrutura hierárquica completa da CNAE (divisão, grupo, classe e subclasse); materializada como tabela.
+    columns:
+      - name: cnae_code
+        description: Código da subclasse CNAE (7 dígitos).
+        tests: [not_null, unique]
+      - name: division_code
+        description: Código de 2 dígitos correspondente à Divisão da CNAE.
+      - name: group_code
+        description: Código de 3 dígitos correspondente ao Grupo da CNAE.
+      - name: class_code
+        description: Código de 5 dígitos correspondente à Classe da CNAE.
+      - name: subclass_description
+        description: Descrição da subclasse CNAE.
+
+  - name: dim_company_capital_history
+    description: Visão analítica de projeção histórica de alterações de Capital Social (SCD Tipo 2) no grão de `cnpj_basico + valid_from`, construída a partir do snapshot dbt.
+    columns:
+      - name: cnpj_basico
+        description: Identificador da empresa.
+        tests: [not_null]
+      - name: valid_from
+        description: Data/hora de início de validade da versão do Capital Social.
+        tests: [not_null]
+      - name: valid_to
+        description: Data/hora de encerramento da versão (nulo se for a versão corrente).
+      - name: is_current
+        description: Indicador booleano de registro corrente.
+      - name: capital_social
+        description: Valor do Capital Social vigente no período.

@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: Camada Bronze contendo dados brutos imutáveis carregados dos arquivos públicos de CNPJ da Receita Federal.
+    schema: bronze
+    tables:
+      - name: raw_companies
+        description: Dados cadastrais brutos de empresas (Empresas0..9), incluindo CNPJ básico, razão social, natureza jurídica e capital social bruto.
+      - name: raw_establishments
+        description: Dados brutos de estabelecimentos (Estabelecimentos0..9), incluindo CNPJ de 14 dígitos, situação cadastral, datas, CNAEs principal e secundários e endereço.
+      - name: raw_partners
+        description: Dados brutos do quadro societário (Socios0..9), incluindo identificador de sócio, qualificação e país.
+      - name: raw_simples
+        description: Dados brutos de enquadramento no Simples Nacional e MEI (Simples.zip).
+      - name: raw_cnae
+        description: Tabela de domínio com todos os códigos e descrições de atividades econômicas CNAE (Cnaes.zip).

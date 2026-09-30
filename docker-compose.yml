@@ -1,0 +1,84 @@
+name: cnpj-lakehouse
+
+# CNPJ Lakehouse — runtime local em containers.
+# prefect-server : API + UI (127.0.0.1:4200)
+# prefect-runner : registra e executa o deployment cnpj-lakehouse/monthly-ingest
+# dashboard      : Streamlit Gold read-only (127.0.0.1:8501)
+# bootstrap      : ensaio sintético (não é o caminho de entrega)
+# verify         : conferência Bronze/Warehouse/contrato no volume
+
+services:
+  prefect-server:
+    build: .
+    command: ["uv", "run", "--no-sync", "prefect", "server", "start", "--host", "0.0.0.0", "--port", "4200"]
+    environment:
+      PREFECT_HOME: /prefect
+      # UI no browser usa same-origin /api (localhost e 127.0.0.1).
+      PREFECT_UI_API_URL: /api
+      PREFECT_API_DATABASE_TIMEOUT: "60"
+      PREFECT_API_DATABASE_CONNECTION_TIMEOUT: "60"
+    volumes: ["prefect_state:/prefect", "lakehouse_runtime:/runtime"]
+    ports: ["127.0.0.1:4200:4200"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4200/api/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  prefect-runner:
+    build: .
+    command: ["uv", "run", "--no-sync", "cnpj-lakehouse-serve"]
+    environment:
+      PREFECT_HOME: /tmp/prefect-client
+      PREFECT_API_URL: http://prefect-server:4200/api
+      CNPJ_LAKEHOUSE_RUNTIME_ROOT: /runtime
+      CNPJ_LAKEHOUSE_SAMPLE_SIZE: ${CNPJ_LAKEHOUSE_SAMPLE_SIZE:-10000}
+      CNPJ_LAKEHOUSE_PARALLEL_JOBS: ${CNPJ_LAKEHOUSE_PARALLEL_JOBS:-1}
+      CNPJ_LAKEHOUSE_INGESTION_WORKERS: ${CNPJ_LAKEHOUSE_INGESTION_WORKERS:-2}
+      PREFECT_API_DATABASE_TIMEOUT: "60"
+      PREFECT_API_DATABASE_CONNECTION_TIMEOUT: "60"
+    volumes: ["lakehouse_runtime:/runtime"]
+    depends_on:
+      prefect-server: {condition: service_healthy}
+
+  dashboard:
+    build: .
+    command: ["uv", "run", "--no-sync", "cnpj-lakehouse-dashboard"]
+    environment:
+      CNPJ_LAKEHOUSE_DUCKDB_PATH: /runtime/run/warehouse/cnpj_lakehouse.duckdb
+      CNPJ_LAKEHOUSE_DASHBOARD_ADDRESS: 0.0.0.0
+      CNPJ_LAKEHOUSE_DASHBOARD_PORT: "8501"
+    volumes: ["lakehouse_runtime:/runtime:ro"]
+    ports: ["127.0.0.1:8501:8501"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  bootstrap:
+    build: .
+    command: ["bash", "scripts/docker_bootstrap.sh"]
+    environment:
+      PREFECT_HOME: /tmp/prefect-client
+      PREFECT_API_URL: http://prefect-server:4200/api
+      CNPJ_LAKEHOUSE_RUNTIME_ROOT: /runtime
+    volumes: ["lakehouse_runtime:/runtime"]
+    depends_on:
+      prefect-server: {condition: service_healthy}
+      prefect-runner: {condition: service_started}
+
+  verify:
+    build: .
+    profiles: [tools]
+    command: ["bash", "scripts/docker_verify.sh"]
+    environment:
+      CNPJ_LAKEHOUSE_RUNTIME_ROOT: /runtime
+      CNPJ_LAKEHOUSE_DUCKDB_PATH: /runtime/run/warehouse/cnpj_lakehouse.duckdb
+    volumes: ["lakehouse_runtime:/runtime:ro"]
+
+volumes:
+  prefect_state:
+    name: cnpj_lakehouse_prefect_state
+  lakehouse_runtime:
+    name: cnpj_lakehouse_runtime

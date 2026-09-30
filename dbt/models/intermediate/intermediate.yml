@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: int_company_rollup
+    description: Modelo intermediário que consolida métricas de estabelecimentos ativos, contagem de sócios, estabelecimento representativo (matriz ativa prioritária) e enquadramentos fiscais por empresa.
+    columns:
+      - name: cnpj_basico
+        description: Identificador raiz da empresa no grão único.
+        tests: [not_null, unique]
+      - name: active_establishment_count
+        description: Quantidade de estabelecimentos ativos (situação cadastral = 02) pertencentes à empresa.
+        tests: [not_null, non_negative]
+      - name: partner_count
+        description: Quantidade total de sócios associados à empresa no quadro societário.
+        tests: [not_null, non_negative]
+      - name: principal_cnae
+        description: CNAE principal do estabelecimento ativo representativo da empresa.
+      - name: uf
+        description: Unidade Federativa (UF) do estabelecimento representativo.
+
+  - name: int_establishment_secondary_cnae
+    description: Modelo intermediário que normaliza e explode a lista delimitada por vírgulas de CNAEs secundários dos estabelecimentos em linhas distintas. Permanece na Silver para qualidade e reuso; nenhum mart Gold o referencia.
+    tests:
+      - unique_combination:
+          arguments:
+            combination_of_columns: [cnpj, secondary_cnae_code, source_period, sample_id]
+    columns:
+      - name: cnpj
+        description: Identificador de 14 dígitos do estabelecimento.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_establishments')
+                field: cnpj
+      - name: secondary_cnae_code
+        description: Código CNAE de atividade econômica secundária (7 posições normalizadas).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_cnae')
+                field: cnae_code

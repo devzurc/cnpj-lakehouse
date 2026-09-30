@@ -1,0 +1,38 @@
+# Python and local tooling
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.py[cod]
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+
+# Local configuration and generated data
+.env
+.env.*
+!.env.example
+config/sampling.toml
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+runtime/
+downloads/
+*.db
+*.sqlite
+*.parquet
+*.duckdb
+*.duckdb.wal
+*.duckdb.tmp
+*.part
+*.zip
+*.csv
+
+# Generated documents
+docs/*.pdf
+!docs/finops-bigquery-architecture.pdf

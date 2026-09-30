@@ -1,0 +1,41 @@
+# Project-local defense in depth. These rules prompt at execution time and do not
+# replace the repository requirement for explicit user authorization.
+prefix_rule(
+  pattern = ["git", "push"],
+  decision = "prompt",
+  justification = "Ask before publishing repository history.",
+  match = ["git push origin main", "git push --force-with-lease origin main"],
+  not_match = ["git status", "git fetch origin"]
+)
+
+prefix_rule(
+  pattern = ["gh", "repo", ["create", "delete", "archive", "edit"]],
+  decision = "prompt",
+  justification = "Ask before creating, removing, archiving, or changing an external repository.",
+  match = ["gh repo create owner/repo --public", "gh repo delete owner/repo --yes"],
+  not_match = ["gh repo view owner/repo", "gh repo list"]
+)
+
+prefix_rule(
+  pattern = ["gh", "pr", ["create", "merge", "close", "reopen"]],
+  decision = "prompt",
+  justification = "Ask before changing pull-request state.",
+  match = ["gh pr create --fill", "gh pr merge 42 --squash"],
+  not_match = ["gh pr list"]
+)
+
+prefix_rule(
+  pattern = ["gh", "release", ["create", "delete", "edit"]],
+  decision = "prompt",
+  justification = "Ask before publishing or changing a GitHub release.",
+  match = ["gh release create v1.0.0", "gh release delete v1.0.0 --yes"],
+  not_match = ["gh release list", "gh release view v1.0.0"]
+)
+
+prefix_rule(
+  pattern = [["gcloud", "bq", "gsutil"]],
+  decision = "prompt",
+  justification = "Cloud execution is outside the local-first critical path.",
+  match = ["gcloud projects list", "bq query --use_legacy_sql=false SELECT 1", "gsutil ls"],
+  not_match = ["git status"]
+)

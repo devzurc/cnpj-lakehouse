@@ -1,0 +1,25 @@
+name: cnpj_lakehouse
+version: 0.1.0
+config-version: 2
+profile: cnpj_lakehouse
+
+model-paths: [models]
+macro-paths: [macros]
+snapshot-paths: [snapshots]
+test-paths: [tests]
+clean-targets: [target, dbt_packages]
+
+models:
+  cnpj_lakehouse:
+    staging:
+      +materialized: view
+      +schema: silver
+    intermediate:
+      +materialized: table
+      +schema: silver
+    marts:
+      +schema: gold
+
+snapshots:
+  cnpj_lakehouse:
+    +target_schema: snapshots
