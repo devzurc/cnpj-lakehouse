@@ -4,7 +4,7 @@ Evidência agregada das sprints 00–22. Contratos vigentes estão em `specifica
 
 | Sprint | Resultado | Estado |
 |---|---|---|
-| 23 (`sprint-23-cnpj-lakehouse-identity`, S23-01) | Identidade `cnpj-lakehouse`, README de portfólio, CI e agregados Gold. Gates locais passaram. `origin/main` = `b7d3cfe` em `devzurc/cnpj-lakehouse`, tag `v1.0.0`. | complete |
+| 23 (`sprint-23-cnpj-lakehouse-identity`, S23-01) | Identidade `cnpj-lakehouse`, README de portfólio, CI e agregados Gold. Gates locais passaram. Repositório `devzurc/cnpj-lakehouse`, tag `v1.0.0` em `origin/main`. | complete |
 | 22 (`sprint-22-submission-readiness`, S22-01) | Auditoria de submissão contra o PDF original e checklist de handoff; estrutura, Ruff, PDF FinOps, sync offline, 99 testes e demo Docker sintética passaram. Revalidado em 2026-09-14 | complete |
 | 00 | Governança, specs, skills e revisores | complete |
 | 01 | Ingestão Bronze, amostra determinística, relacionamentos | complete |

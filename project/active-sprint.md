@@ -7,4 +7,4 @@ exit_criteria: S23-01 publica a identidade CNPJ Lakehouse no código, no Compose
 
 # Sprint ativa
 
-Sprint 23 está `complete`: `S23-01` publicou `origin/main` em `b7d3cfe` no repositório `devzurc/cnpj-lakehouse`, com a tag `v1.0.0`. O histórico publicado tem um único commit. `S12-01` continua `blocked`.
+Sprint 23 está `complete`: `S23-01` publicou o repositório `devzurc/cnpj-lakehouse` com a tag `v1.0.0` em `origin/main`. O histórico publicado não carrega identificadores anteriores. `S12-01` continua `blocked`.

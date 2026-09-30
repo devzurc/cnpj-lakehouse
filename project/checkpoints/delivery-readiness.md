@@ -1,12 +1,12 @@
 # Checkpoint de Prontidão da Entrega
 
-Última reconciliação: 2026-09-30 — Sprint 23 `complete` (`S23-01`); `origin/main` = `b7d3cfe` em `devzurc/cnpj-lakehouse`, tag `v1.0.0`; S12-01 permanece bloqueada
+Última reconciliação: 2026-09-30 — Sprint 23 `complete` (`S23-01`); `devzurc/cnpj-lakehouse` com tag `v1.0.0` em `origin/main`; S12-01 permanece bloqueada
 
 Este checkpoint resume evidências já verificadas. Ele não substitui especificações, ADRs ou artefatos de execução e não concede autorização para ações externas.
 
 ## Estado Atual
 
-> A Sprint 23 publicou a identidade CNPJ Lakehouse. `origin/main` é `b7d3cfe` e a tag `v1.0.0` está no remoto. S12 permanece bloqueada. Cloud, PR e GitHub Release exigem autorização explícita.
+> A Sprint 23 publicou a identidade CNPJ Lakehouse. A tag `v1.0.0` aponta para `origin/main`. S12 permanece bloqueada. Cloud, PR e GitHub Release exigem autorização explícita.
 
 | Área | Estado | Evidência durável |
 |---|---|---|
@@ -22,12 +22,12 @@ Este checkpoint resume evidências já verificadas. Ele não substitui especific
 | Backfill 2026 | BLOQUEADO — S12-01 | Janeiro verificado; conclusão anual pendente. |
 | Runtime Docker Compose | APROVADO LOCAL — S23-01 | Em 2026-09-30, `./scripts/docker.sh start` / `demo` / `verify` via `docker.exe`: imagens `cnpj-lakehouse-*`; flow sintético COMPLETED; 3 empresas nas camadas Bronze, Silver e Gold (`sample_id` `7e6c1d126e749e4673c4`); contrato analítico sem duplicidades, referências ausentes ou falha de snapshot. CLI `docker` nativo ausente neste WSL. |
 | FinOps | APROVADO | `docs/finops-bigquery-architecture.pdf` (6 páginas A4). |
-| Identidade pública | APROVADO — S23-01 | Namespace `cnpj-lakehouse` no código, Compose, volumes e skills. Repositório `https://github.com/devzurc/cnpj-lakehouse`. Histórico publicado: um commit, `b7d3cfe`. |
+| Identidade pública | APROVADO — S23-01 | Namespace `cnpj-lakehouse` no código, Compose, volumes e skills. Repositório `https://github.com/devzurc/cnpj-lakehouse`. O histórico publicado não carrega identificadores anteriores. |
 | Clone limpo | APROVADO LOCAL — S21-01 | `UV_OFFLINE=1` com cache populado nesta revisão (2026-09-14); pytest 99 passed. Não prova cache vazio. |
 | Higiene Git local | APROVADO | Runtime, DuckDB e artefatos dbt excluídos; PDF FinOps rastreado. |
 | Governança de IA | APROVADO — ADR-016 | 7 skills e 6 revisores; validador não exige diário de tarefas. |
 | Repositório GitHub | APROVADO | `https://github.com/devzurc/cnpj-lakehouse`, público. |
-| Publicação do branch `main` | APROVADO | `origin/main` = `b7d3cfe`. Tag `v1.0.0` enviada. PR, GitHub Release e cloud permanecem PENDENTE. |
+| Publicação do branch `main` | APROVADO | Tag `v1.0.0` aponta para `origin/main`. CI do repositório passou. PR, GitHub Release e cloud permanecem PENDENTE. |
 
 ## Gates para Alterações Futuras
 
@@ -39,4 +39,4 @@ Este checkpoint resume evidências já verificadas. Ele não substitui especific
 
 ## Próxima Ação Externa
 
-`origin/main` está em `b7d3cfe`, tag `v1.0.0`. PR, GitHub Release e cloud exigem autorização imediata antes da ação.
+A tag `v1.0.0` aponta para `origin/main` em `https://github.com/devzurc/cnpj-lakehouse`. PR, GitHub Release e cloud exigem autorização imediata antes da ação.
